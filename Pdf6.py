@@ -298,4 +298,30 @@ def generate_pdfs(data):
             f"Wire transfer of ${data['property_valuation']} from {data['first_buyer_name']} (Account XXXXX2090) to {data['second_buyer_name']} on {data['transfer_date_2']} at 02:00 PM WAT."
             f"Transaction ID: 9876543220 | Bank Ref #: 654322 | SWIFT: USBKUS33."
         ])
-        generate_single_pdf("Wire_Transfer
+        generate_single_pdf("Wire_Transfer_Confirmation_2.pdf", elements_19)
+
+        # 20. FIRPTA Disclosure (Bonnie Bryon)
+        if data["first_buyer_nationality"] != "U.S.":
+            elements_20 = []
+            create_section(elements_20, "FIRPTA Disclosure", [
+                f"Foreign Investment in Real Property Tax Act (FIRPTA) disclosure for {data['first_buyer_name']}, a {data['first_buyer_nationality']} citizen, per 26 U.S.C. § 1445."
+                f"Withholding Certificate #: 456789 | Withholding Amount: $98,000.00 (10%)."
+            ] + signature_block)
+            generate_single_pdf("FIRPTA_Disclosure.pdf", elements_20)
+
+        # 21. Apostille Request
+        if data["require_apostille"]:
+            elements_21 = []
+            create_section(elements_21, "Apostille Request", [
+                f"Request for Apostille for transfer of {data['property_address']} (Parcel ID: {data['parcel_id']}) to {data['first_buyer_name']} in Canada, per The Hague Convention of 1961."
+                f"Request #: 9012 | Submitted to Florida Secretary of State on {data['transfer_date_1']}."
+            ] + signature_block)
+            generate_single_pdf("Apostille_Request.pdf", elements_21)
+
+    except ImportError as e:
+        print(f"Error: Missing dependency. Please install reportlab with 'pip install reportlab'. Details: {e}")
+    except Exception as e:
+        print(f"Error: An unexpected issue occurred. Details: {e}")
+
+if __name__ == "__main__":
+    generate_pdfs(data)
