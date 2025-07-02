@@ -1,0 +1,103 @@
+from reportlab.lib.pagesizes import LETTER
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import os
+
+# Setup
+output_path = "USBC_Bank_Letter_JasonLucas.pdf"
+seal_path = "usbc_seal.png"
+stamp_path = "usbc_stamp.png"
+signature_path = "lawyer_signature.png"
+
+# Function to create a fictional stamp image
+def create_stamp_image(path):
+    img = Image.new("RGBA", (300, 300), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse((10, 10, 290, 290), outline="red", width=8)
+    draw.text((80, 130), "APPROVED", fill="red")
+    img.save(path)
+
+# Function to create a fictional seal image
+def create_seal_image(path):
+    img = Image.new("RGBA", (300, 300), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse((10, 10, 290, 290), outline="blue", width=8)
+    draw.text((70, 130), "USBC SEAL", fill="blue")
+    img.save(path)
+
+# Function to simulate a signature
+def create_signature_image(path):
+    img = Image.new("RGBA", (400, 100), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    draw.line((10, 70, 390, 70), fill="black", width=2)
+    draw.text((50, 20), "A. D. Marshall", fill="black")
+    img.save(path)
+
+# Create required fake images
+create_stamp_image(stamp_path)
+create_seal_image(seal_path)
+create_signature_image(signature_path)
+
+# Generate PDF
+def generate_pdf():
+    c = canvas.Canvas(output_path, pagesize=LETTER)
+    width, height = LETTER
+
+    # Letterhead
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(1 * inch, height - 1 * inch, "Marshall & Co. Legal Associates")
+    c.setFont("Helvetica", 10)
+    c.drawString(1 * inch, height - 1.2 * inch, "1055 Legal Way, Suite 700, Detroit, MI 48201")
+    c.drawString(1 * inch, height - 1.35 * inch, "Phone: (313) 555-1298 | Email: info@marshalllegal.us")
+
+    # Document title
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(width / 2, height - 1.8 * inch, "OFFICIAL BANK STATEMENT – USBC")
+
+    # Metadata
+    ref_id = "USBC-DET-20250617-XL9834"
+    c.setFont("Helvetica", 10)
+    c.drawString(1 * inch, height - 2.3 * inch, f"Reference ID: {ref_id}")
+    c.drawString(1 * inch, height - 2.5 * inch, "Issued Date: June 17, 2025")
+    c.drawString(1 * inch, height - 2.7 * inch, "Deadline: June 20, 2025")
+
+    # Recipient
+    c.setFont("Helvetica", 11)
+    c.drawString(1 * inch, height - 3.2 * inch, "To:")
+    c.drawString(1.2 * inch, height - 3.4 * inch, "Mr. Jason Lucas")
+    c.drawString(1.2 * inch, height - 3.6 * inch, "Client ID: 00458212")
+
+    # Body of letter
+    text = c.beginText(1 * inch, height - 4.1 * inch)
+    text.setFont("Helvetica", 11)
+    body = f"""
+Dear Mr. Lucas,
+
+This is to officially confirm the current balance of your personal account with USBC, held under account number ***9081.
+
+As of the issuance date of this letter, your account holds a verified balance of **$967,000.00 USD**.
+
+This letter serves as legal proof of financial standing and has been issued under the supervision of licensed legal representatives and authorized bank compliance officers.
+
+Please ensure all relevant actions are concluded before or by the deadline indicated above. For physical processing, no digital communication has been initiated per request.
+
+Sincerely,
+
+Marshall & Co. Legal Associates
+"""
+    for line in body.splitlines():
+        text.textLine(line.strip())
+    c.drawText(text)
+
+    # Insert seal, stamp, and signature
+    c.drawImage(seal_path, 1 * inch, 1.2 * inch, width=1.5 * inch, mask='auto')
+    c.drawImage(stamp_path, 4.5 * inch, 1.2 * inch, width=1.5 * inch, mask='auto')
+    c.drawImage(signature_path, 1 * inch, 2 * inch, width=2.5 * inch, mask='auto')
+
+    c.showPage()
+    c.save()
+    print(f"PDF generated: {output_path}")
+
+generate_pdf()
